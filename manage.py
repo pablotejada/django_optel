@@ -11,19 +11,22 @@ def instrument():
     from opentelemetry.exporter.otlp.proto.http.trace_exporter import (
         OTLPSpanExporter,
     )
+    from opentelemetry.instrumentation.django import DjangoInstrumentor
     from opentelemetry.sdk.resources import Resource
     from opentelemetry.sdk.trace import TracerProvider, sampling
     from opentelemetry.sdk.trace.export import (
         BatchSpanProcessor,
     )
+    
+    DjangoInstrumentor().instrument()
 
     merged = dict()
     for name in ["dt_metadata_e617c525669e072eebe3d0f08212e8f2.json", "/var/lib/dynatrace/enrichment/dt_metadata.json"]:
         try:
             data = ''
             with open(name) as f:
-            data = json.load(f if name.startswith("/var") else open(f.read()))
-            merged.update(data)
+                data = json.load(f if name.startswith("/var") else open(f.read()))
+                merged.update(data)
         except:
             pass
 
@@ -38,14 +41,23 @@ def instrument():
 
     tracer_provider.add_span_processor(
         BatchSpanProcessor(OTLPSpanExporter(
-            endpoint="http://localhost:14499/otlp/v1/traces"
+            # With OA running on the same host:
+            #endpoint="http://localhost:14499/otlp/v1/traces"
+
+            # Without OA:
+            #TODO Replace <URL> to your SaaS/Managed-URL
+            endpoint="https://{your-environment-id}.live.dynatrace.com/api/v2/otlp/v1/traces",
+            headers={
+                #TODO Replace <TOKEN> with your API Token with `Ingest OpenTelemetry traces` permission
+                "Authorization": "Api-Token <TOKEN>" 
+            },
         )))
 
 
 def main():
     """Run administrative tasks."""
-    instrument()
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_project.settings')
+    instrument()
     # os.environ.setdefault(
     #     "DJANGO_SETTINGS_MODULE", "instrumentation_example.settings"
     # )
