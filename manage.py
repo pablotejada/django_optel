@@ -47,17 +47,20 @@ def instrument():
 
     tracer_provider.add_span_processor(
         BatchSpanProcessor(OTLPSpanExporter(
+
+            #
             # TODOO WITH OA running on the same host:
-            endpoint="http://localhost:14499/otlp/v1/traces",
+            #endpoint="http://localhost:14499/otlp/v1/traces",
 
             # WITHOUT OA RUNNING:
             #TODOO Replace <URL> to your SaaS/Managed-URL
             #endpoint= f"https://{env_id}.live.dynatrace.com/api/v2/otlp/v1/traces",
             # endpoint= f"{env_url}/api/v2/otlp/v1/traces",
-            # headers={
-            #     #TODOO Replace <TOKEN> with your API Token with `Ingest OpenTelemetry traces` permission
-            #     "Authorization": f"Api-Token {token}" 
-            # },
+            endpoint = "http://127.0.0.1:5000/json-example",
+            headers={
+                #TODOO Replace <TOKEN> with your API Token with `Ingest OpenTelemetry traces` permission
+                "Authorization": f"Api-Token {token}" 
+            },
         )))
 
 
